@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
     html, body { height: 100%; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; background: linear-gradient(135deg, #e0f7fa, #80deea); background-attachment: fixed; background-size: cover; background-repeat: no-repeat; color: #333; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 10px; min-height: 100vh; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif; background: linear-gradient(135deg, #e0f7fa, #80deea); background-attachment: fixed; background-size: cover; color: #333; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0; min-height: 100vh; box-sizing: border-box; }
     .container { text-align: center; padding: 20px; max-width: 420px; width: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
     .current-datetime { font-size: 18px; color: #333; margin-bottom: 20px; background: rgba(255,255,255,0.8); padding: 6px 10px; border-radius: 20px; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(8px); width: fit-content; text-align: center; }
     .value { font-size: 70px; margin: 10px 0; font-weight: 700; color: #004d40; }
@@ -43,7 +43,7 @@
     </div>
     <button id="resetBtn">Reset</button>
 </div>
-<div id="infoBtn">i</div>
+<div id="infoBtn" title="Holidays and details">i</div>
 <script>
 (function(){
     const holidays2026 = [
@@ -82,6 +82,7 @@
     const setBtn = document.getElementById("setBtn");
     const cancelBtn = document.getElementById("cancelBtn");
     const resetBtn = document.getElementById("resetBtn");
+    const infoBtn = document.getElementById("infoBtn");
     const currentDateTimeEl = document.getElementById("currentDateTime");
 
     function isWorkingDay(date){
@@ -129,8 +130,21 @@
     function openPicker(key){
         currentTargetKey = key;
         pickerContainer.style.display='flex';
-        dateInput.valueAsDate = targetDates[key];
+        dateInput.type='date';
+        // Force European display by setting value as ISO and formatting after selection
+        const d = targetDates[key];
+        dateInput.value = d.toISOString().split('T')[0];
     }
+
+    dateInput.addEventListener('change', ()=>{
+        if(currentTargetKey){
+            const parts = dateInput.value.split('-');
+            if(parts.length === 3){
+                const d = new Date(parts[0], parts[1]-1, parts[2]);
+                dateInput.setAttribute('data-display', formatDate(d));
+            }
+        }
+    });
 
     dateDisplay.addEventListener('click', ()=> openPicker('main'));
     animDateDisplay.addEventListener('click', ()=> openPicker('animation'));
@@ -138,10 +152,16 @@
 
     setBtn.addEventListener('click', ()=>{
         if(currentTargetKey){
-            if(confirm(`Are you sure you want to change the ${currentTargetKey} Wrap date?`)){
-                targetDates[currentTargetKey] = new Date(dateInput.value);
-                calculate();
-                pickerContainer.style.display='none';
+            const parts = dateInput.value.split('-');
+            if(parts.length === 3){
+                const newDate = new Date(parts[0], parts[1]-1, parts[2]);
+                if(confirm(`Are you sure you want to change the ${currentTargetKey} Wrap date?`)){
+                    targetDates[currentTargetKey] = newDate;
+                    calculate();
+                    pickerContainer.style.display='none';
+                }
+            } else {
+                alert('Invalid date selected');
             }
         }
     });
@@ -153,6 +173,12 @@
         targetDates.animation = new Date("2026-09-16");
         targetDates.layout = new Date("2026-07-10");
         calculate();
+    });
+
+    infoBtn.addEventListener('click', ()=>{
+        const upcoming = holidays2026.filter(h => new Date(h.date) >= new Date());
+        let text = upcoming.map(h => `${formatDate(new Date(h.date))}: ${h.name}`).join('\n');
+        alert(`Upcoming Holidays:\n${text}`);
     });
 
     setInterval(calculate,60000);
