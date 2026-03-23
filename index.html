@@ -50,12 +50,12 @@
         width: fit-content;
         text-align: center;
     }
-    .value { font-size: 70px; margin: 10px 0; font-weight: 700; color: #004d40; }
+    .value { font-size: 70px; margin: 10px 0; font-weight: 700; color: #004d40; } /* removed bg */
     .label { font-size: 20px; opacity: 0.9; color: #444; }
-    .sub-value { font-size: 20px; font-weight: 400; margin-top: 8px; color: #0077cc; }
+    .sub-value { font-size: 20px; font-weight: 400; margin-top: 8px; color: rgba(0,77,64,0.7); }
     .divider { margin: 20px 0; border-top: 1px solid rgba(255,255,255,0.4); }
     .date { margin-top: 10px; font-size: 16px; opacity: 0.7; cursor: pointer; color: #009688; text-align: center; }
-    .anim-date, .lay-date { opacity: 0.6; font-size: 14px; color: #003333; text-align: center; }
+    .anim-date, .lay-date { color: #004d40; opacity: 0.5; font-size: 14px; text-align: center; }
     .date-picker-container { display: none; margin-top: 12px; }
     input[type="date"] { padding: 8px 12px; font-size: 16px; border-radius: 6px; border: none; }
     button { margin-left: 6px; padding: 6px 12px; font-size: 14px; cursor: pointer; border-radius: 6px; border: none; background: #0077cc; color: #fff; }
@@ -95,7 +95,7 @@
         margin: 15px 0;
         height: 1px;
         width: 100%;
-        background: linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,0.25), rgba(255,255,255,0));
+        background: linear-gradient(to right, rgba(255,255,255,0), rgba(0,77,64,0.1), rgba(255,255,255,0));
         border: none;
     }
     @media(max-width: 480px){
