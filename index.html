@@ -11,7 +11,7 @@
         padding: 0;
     }
     body {
-        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
         background: linear-gradient(135deg, #e0f7fa, #80deea);
         background-attachment: fixed;
         background-size: cover;
@@ -21,7 +21,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: flex-start;
+        justify-content: center;
         padding: 0 10px;
         min-height: 100vh;
         box-sizing: border-box;
@@ -31,10 +31,10 @@
         padding: 20px;
         max-width: 420px;
         width: 100%;
-        flex: 1;
         display: flex;
         flex-direction: column;
         justify-content: center;
+        align-items: center;
     }
     .current-datetime {
         font-size: 18px;
@@ -47,22 +47,19 @@
         justify-content: center;
         align-items: center;
         backdrop-filter: blur(8px);
-        margin-left: auto;
-        margin-right: auto;
         width: fit-content;
-        max-width: 160px;
+        text-align: center;
     }
     .value { font-size: 70px; margin: 10px 0; font-weight: 700; color: #004d40; }
     .label { font-size: 20px; opacity: 0.9; color: #444; }
     .sub-value { font-size: 20px; font-weight: 400; margin-top: 8px; color: #0077cc; }
-    .divider { margin: 20px 0; border-top: 1px solid rgba(0,0,0,0.1); }
-    .date { margin-top: 10px; font-size: 16px; opacity: 0.7; cursor: pointer; color: #009688; }
-    .anim-date, .lay-date { opacity: 0.7; font-size: 14px; color: #004d40; }
+    .divider { margin: 20px 0; border-top: 1px solid rgba(255,255,255,0.4); }
+    .date { margin-top: 10px; font-size: 16px; opacity: 0.7; cursor: pointer; color: #009688; text-align: center; }
+    .anim-date, .lay-date { opacity: 0.6; font-size: 14px; color: #003333; text-align: center; }
     .date-picker-container { display: none; margin-top: 12px; }
     input[type="date"] { padding: 8px 12px; font-size: 16px; border-radius: 6px; border: none; }
     button { margin-left: 6px; padding: 6px 12px; font-size: 14px; cursor: pointer; border-radius: 6px; border: none; background: #0077cc; color: #fff; }
-    #refreshBtn { margin-top: 20px; padding: 4px 8px; font-size: 12px; border-radius: 6px; border: none; background: transparent; color: rgba(0,0,0,0.5); cursor: pointer; text-transform: none; }
-
+    #refreshBtn { margin-top: 20px; padding: 4px 8px; font-size: 12px; border-radius: 6px; border: none; background: transparent; color: rgba(0,0,0,0.5); cursor: pointer; }
     #infoBtn {
         position: fixed;
         bottom: 20px;
@@ -78,7 +75,6 @@
         font-weight: bold;
         cursor: pointer;
     }
-
     #holidayInfo {
         position: fixed;
         bottom: 80px;
@@ -90,13 +86,18 @@
         display: none;
         width: 90%;
         max-width: 260px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.05);
     }
     #holidayInfo ul { padding-left: 18px; margin: 8px 0; }
     #holidayInfo li { margin-bottom: 5px; }
     #holidayInfo .holiday-date { font-weight: bold; margin-right: 6px; }
-
-    .section-divider { border-top: 1px solid rgba(0,0,0,0.2); margin: 15px 0; }
-
+    .section-divider {
+        margin: 15px 0;
+        height: 1px;
+        width: 100%;
+        background: linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,0.25), rgba(255,255,255,0));
+        border: none;
+    }
     @media(max-width: 480px){
         .value { font-size: 50px; }
         .label { font-size: 18px; }
@@ -107,164 +108,100 @@
 </style>
 </head>
 <body>
-
 <div class="container">
     <div id="currentDateTime" class="current-datetime">--</div>
-
     <div class="label">Business Days Left</div>
     <div id="days" class="value">--</div>
-
     <div class="label">Business Weeks Left</div>
     <div id="weeks" class="value">--</div>
-
-    <div id="dateDisplay" class="date"></div>
-
+    <div id="dateDisplay" class="date">Wrap: --</div>
     <div class="section-divider"></div>
-
     <div class="sub-value" id="animCountdown">Animation: -- days / -- weeks</div>
-    <div id="animDateDisplay" class="date anim-date"></div>
-
+    <div id="animDateDisplay" class="date anim-date">Wrap: --</div>
     <div class="section-divider"></div>
-
     <div class="sub-value" id="layCountdown">Layout: -- days / -- weeks</div>
-    <div id="layDateDisplay" class="date lay-date"></div>
-
+    <div id="layDateDisplay" class="date lay-date">Wrap: --</div>
     <div class="date-picker-container" id="pickerContainer">
         <input type="date" id="dateInput">
         <button id="setBtn">Set</button>
         <button id="cancelBtn">Cancel</button>
     </div>
-
     <button id="refreshBtn">Reset</button>
 </div>
-
 <div id="infoBtn">i</div>
 <div id="holidayInfo">
     <div><b>Madrid Holidays (2026)</b></div>
     <ul id="holidayList"></ul>
 </div>
-
 <script>
-const holidays2026 = [
-    {date:"2026-01-01", name:"New Year's Day"},
-    {date:"2026-01-06", name:"Epiphany"},
-    {date:"2026-04-02", name:"Maundy Thursday"},
-    {date:"2026-04-03", name:"Good Friday"},
-    {date:"2026-05-01", name:"Labor Day"},
-    {date:"2026-05-02", name:"Madrid Community Day"},
-    {date:"2026-05-15", name:"Ascension Day"},
-    {date:"2026-07-25", name:"Santiago Apostol"},
-    {date:"2026-08-15", name:"Assumption of Mary"},
-    {date:"2026-10-12", name:"National Day"},
-    {date:"2026-11-01", name:"All Saints' Day"},
-    {date:"2026-11-09", name:"Madrid Local Holiday"},
-    {date:"2026-12-06", name:"Constitution Day"},
-    {date:"2026-12-08", name:"Immaculate Conception"},
-    {date:"2026-12-25", name:"Christmas Day"}
-];
+(function(){
+    const holidays2026 = [
+        {date:"2026-01-01", name:"New Year's Day"},
+        {date:"2026-01-06", name:"Epiphany"},
+        {date:"2026-04-02", name:"Maundy Thursday"},
+        {date:"2026-04-03", name:"Good Friday"},
+        {date:"2026-05-01", name:"Labor Day"},
+        {date:"2026-05-02", name:"Madrid Community Day"},
+        {date:"2026-05-15", name:"Ascension Day"},
+        {date:"2026-07-25", name:"Santiago Apostol"},
+        {date:"2026-08-15", name:"Assumption of Mary"},
+        {date:"2026-10-12", name:"National Day"},
+        {date:"2026-11-01", name:"All Saints' Day"},
+        {date:"2026-11-09", name:"Madrid Local Holiday"},
+        {date:"2026-12-06", name:"Constitution Day"},
+        {date:"2026-12-08", name:"Immaculate Conception"},
+        {date:"2026-12-25", name:"Christmas Day"}
+    ];
 
-let targetDate = new Date("2026-11-06");
-let animTargetDate = new Date("2026-09-16");
-let layTargetDate = new Date("2026-07-10");
+    let targetDate = new Date("2026-11-06");
+    let animTargetDate = new Date("2026-09-16");
+    let layTargetDate = new Date("2026-07-10");
 
-const daysEl = document.getElementById("days");
-const weeksEl = document.getElementById("weeks");
-const animEl = document.getElementById("animCountdown");
-const layEl = document.getElementById("layCountdown");
-const dateDisplay = document.getElementById("dateDisplay");
-const animDateDisplay = document.getElementById("animDateDisplay");
-const layDateDisplay = document.getElementById("layDateDisplay");
-const currentDateTimeEl = document.getElementById("currentDateTime");
-const dateInput = document.getElementById("dateInput");
-const pickerContainer = document.getElementById("pickerContainer");
-const setBtn = document.getElementById("setBtn");
-const cancelBtn = document.getElementById("cancelBtn");
-const infoBtn = document.getElementById("infoBtn");
-const holidayInfo = document.getElementById("holidayInfo");
-const holidayList = document.getElementById("holidayList");
-const refreshBtn = document.getElementById("refreshBtn");
+    const daysEl = document.getElementById("days");
+    const weeksEl = document.getElementById("weeks");
+    const animEl = document.getElementById("animCountdown");
+    const layEl = document.getElementById("layCountdown");
+    const dateDisplay = document.getElementById("dateDisplay");
+    const animDateDisplay = document.getElementById("animDateDisplay");
+    const layDateDisplay = document.getElementById("layDateDisplay");
+    const currentDateTimeEl = document.getElementById("currentDateTime");
 
-function isWorkingDay(date){
-    const day = date.getDay();
-    const iso = date.toISOString().split('T')[0];
-    return day !== 0 && day !== 6 && !holidays2026.some(h => h.date === iso);
-}
+    function isWorkingDay(date){
+        const day = date.getDay();
+        const iso = date.toISOString().split('T')[0];
+        return day !== 0 && day !== 6 && !holidays2026.some(h => h.date === iso);
+    }
 
-function formatDate(d){
-    return `${d.getDate().toString().padStart(2,'0')}.${(d.getMonth()+1).toString().padStart(2,'0')}.${d.getFullYear().toString().slice(-2)}`;
-}
+    function formatDate(d){
+        return `${d.getDate().toString().padStart(2,'0')}.${(d.getMonth()+1).toString().padStart(2,'0')}.${d.getFullYear().toString().slice(-2)}`;
+    }
 
-function calculate(){
-    const today = new Date();
-    today.setHours(0,0,0,0);
-    const now = new Date();
-    currentDateTimeEl.textContent = `${formatDate(now)} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+    function calculate(){
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        const now = new Date();
+        currentDateTimeEl.textContent = `${formatDate(now)} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
 
-    let count=0, d=new Date(today);
-    while(d <= targetDate){ if(isWorkingDay(d)) count++; d.setDate(d.getDate()+1); }
+        let count=0, d=new Date(today);
+        while(d <= targetDate){ if(isWorkingDay(d)) count++; d.setDate(d.getDate()+1); }
+        let animCount=0, ad=new Date(today);
+        while(ad <= animTargetDate){ if(isWorkingDay(ad)) animCount++; ad.setDate(ad.getDate()+1); }
+        let layCount=0, ld=new Date(today);
+        while(ld <= layTargetDate){ if(isWorkingDay(ld)) layCount++; ld.setDate(ld.getDate()+1); }
 
-    let animCount=0, ad=new Date(today);
-    while(ad <= animTargetDate){ if(isWorkingDay(ad)) animCount++; ad.setDate(ad.getDate()+1); }
+        daysEl.textContent = count;
+        weeksEl.textContent = Math.floor(count / 5);
+        animEl.textContent = `Animation: ${animCount} days / ${Math.floor(animCount / 5)} weeks`;
+        layEl.textContent = `Layout: ${layCount} days / ${Math.floor(layCount / 5)} weeks`;
 
-    let layCount=0, ld=new Date(today);
-    while(ld <= layTargetDate){ if(isWorkingDay(ld)) layCount++; ld.setDate(ld.getDate()+1); }
+        dateDisplay.textContent = `Wrap: ${formatDate(targetDate)}`;
+        animDateDisplay.textContent = `Wrap: ${formatDate(animTargetDate)}`;
+        layDateDisplay.textContent = `Wrap: ${formatDate(layTargetDate)}`;
+    }
 
-    daysEl.textContent = count;
-    weeksEl.textContent = Math.floor(count / 5);
-    animEl.textContent = `Animation: ${animCount} days / ${Math.floor(animCount / 5)} weeks`;
-    layEl.textContent = `Layout: ${layCount} days / ${Math.floor(layCount / 5)} weeks`;
-
-    dateDisplay.textContent = `Target: ${formatDate(targetDate)}`;
-    animDateDisplay.textContent = `Animation Target: ${formatDate(animTargetDate)}`;
-    layDateDisplay.textContent = `Layout Target: ${formatDate(layTargetDate)}`;
-}
-
-function attachDateHandler(displayEl, getDate, setDate){
-    displayEl.addEventListener('click', ()=>{
-        dateInput.value = getDate().toISOString().split('T')[0];
-        pickerContainer.style.display = 'inline-block';
-        setBtn.onclick = ()=>{
-            if(!dateInput.value) return;
-            setDate(new Date(dateInput.value));
-            pickerContainer.style.display = 'none';
-            calculate();
-        };
-    });
-}
-
-attachDateHandler(dateDisplay, ()=>targetDate, d=>targetDate=d);
-attachDateHandler(animDateDisplay, ()=>animTargetDate, d=>animTargetDate=d);
-attachDateHandler(layDateDisplay, ()=>layTargetDate, d=>layTargetDate=d);
-
-cancelBtn.addEventListener('click', ()=>{ pickerContainer.style.display='none'; });
-infoBtn.addEventListener('click', ()=>{ holidayInfo.style.display = holidayInfo.style.display==='none'?'block':'none'; });
-refreshBtn.addEventListener('click', ()=>{ calculate(); });
-
-function populateHolidayList(){
-    const today = new Date();
-    today.setHours(0,0,0,0);
-    holidayList.innerHTML='';
-    holidays2026.forEach(h=>{
-        const hDate=new Date(h.date);
-        if(hDate>=today){
-            const li=document.createElement('li');
-            li.innerHTML=`<span class='holiday-date'>${formatDate(hDate)}</span> ${h.name}`;
-            holidayList.appendChild(li);
-        }
-    });
-}
-
-populateHolidayList();
-calculate();
-setInterval(calculate,60000);
-
-function scheduleMidnightRefresh(){
-    const now=new Date();
-    const msToMidnight=new Date(now.getFullYear(), now.getMonth(), now.getDate()+1,0,0,0,0)-now;
-    setTimeout(()=>{ calculate(); scheduleMidnightRefresh(); }, msToMidnight);
-}
-scheduleMidnightRefresh();
+    setInterval(calculate,60000);
+    calculate();
+})();
 </script>
-
 </body>
 </html>
