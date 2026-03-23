@@ -18,7 +18,8 @@
     input[type="date"] { padding: 8px 12px; font-size: 16px; border-radius: 6px; border: none; }
     button { margin-left: 6px; padding: 6px 12px; font-size: 14px; cursor: pointer; border-radius: 6px; border: none; background: #0077cc; color: #fff; }
     #infoBtn { position: fixed; bottom: 20px; right: 20px; width: 45px; height: 45px; border-radius: 50%; background: #0077cc; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; }
-    .section-divider { width: 100%; height: 1px; background: rgba(0,77,64,0.2); margin: 15px 0; border: none; }
+    .section-divider { width: 100%; height: 1px; background: linear-gradient(to right, transparent, rgba(0,77,64,0.2), transparent); margin: 15px 0; border: none; }
+    #resetBtn { font-size: 12px; opacity: 0.5; background: none; color: #0077cc; margin-top: 10px; }
 </style>
 </head>
 <body>
@@ -40,6 +41,7 @@
         <button id="setBtn">Set</button>
         <button id="cancelBtn">Cancel</button>
     </div>
+    <button id="resetBtn">Reset</button>
 </div>
 <div id="infoBtn">i</div>
 <script>
@@ -79,6 +81,7 @@
     const dateInput = document.getElementById("dateInput");
     const setBtn = document.getElementById("setBtn");
     const cancelBtn = document.getElementById("cancelBtn");
+    const resetBtn = document.getElementById("resetBtn");
     const currentDateTimeEl = document.getElementById("currentDateTime");
 
     function isWorkingDay(date){
@@ -97,15 +100,22 @@
         const now = new Date();
         currentDateTimeEl.textContent = `${formatDate(now)} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
 
-        let count=0, d=new Date(today);
-        while(d <= targetDates.main){ if(isWorkingDay(d)) count++; d.setDate(d.getDate()+1); }
-        let animCount=0, ad=new Date(today);
-        while(ad <= targetDates.animation){ if(isWorkingDay(ad)) animCount++; ad.setDate(ad.getDate()+1); }
-        let layCount=0, ld=new Date(today);
-        while(ld <= targetDates.layout){ if(isWorkingDay(ld)) layCount++; ld.setDate(ld.getDate()+1); }
+        function countDays(target){
+            let cnt = 0;
+            let d = new Date(today);
+            while(d <= target){
+                if(isWorkingDay(d)) cnt++;
+                d.setDate(d.getDate()+1);
+            }
+            return cnt;
+        }
 
-        daysEl.textContent = count;
-        weeksEl.textContent = Math.floor(count / 5);
+        const mainCount = countDays(targetDates.main);
+        const animCount = countDays(targetDates.animation);
+        const layCount = countDays(targetDates.layout);
+
+        daysEl.textContent = mainCount;
+        weeksEl.textContent = Math.floor(mainCount / 5);
         animEl.textContent = `Animation: ${animCount} days / ${Math.floor(animCount / 5)} weeks`;
         layEl.textContent = `Layout: ${layCount} days / ${Math.floor(layCount / 5)} weeks`;
 
@@ -118,7 +128,7 @@
 
     function openPicker(key){
         currentTargetKey = key;
-        pickerContainer.style.display = 'flex';
+        pickerContainer.style.display='flex';
         dateInput.valueAsDate = targetDates[key];
     }
 
@@ -128,15 +138,20 @@
 
     setBtn.addEventListener('click', ()=>{
         if(currentTargetKey){
-            if(confirm(`Are you sure you want to change the ${currentTargetKey} Wrap date?`)){
-                targetDates[currentTargetKey] = new Date(dateInput.value);
-                calculate();
-                pickerContainer.style.display = 'none';
-            }
+            targetDates[currentTargetKey] = new Date(dateInput.value);
+            calculate();
+            pickerContainer.style.display='none';
         }
     });
 
     cancelBtn.addEventListener('click', ()=> pickerContainer.style.display='none');
+
+    resetBtn.addEventListener('click', ()=>{
+        targetDates.main = new Date("2026-11-06");
+        targetDates.animation = new Date("2026-09-16");
+        targetDates.layout = new Date("2026-07-10");
+        calculate();
+    });
 
     setInterval(calculate,60000);
     calculate();
