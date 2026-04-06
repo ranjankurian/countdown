@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Workday Countdown</title>
+<title>Workday Countdown - Modern Simple Color</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
     html, body { height: 100%; margin: 0; padding: 0; }
@@ -27,6 +27,7 @@
     <div id="currentDateTime" class="current-datetime">--</div>
     <div class="label">Business Days Left</div>
     <div id="days" class="value">--</div>
+    <div id="timeRemaining" class="sub-value" style="margin-top:-5px; margin-bottom:10px; font-weight:700;">-- h -- m -- s</div>
     <div class="label">Business Weeks Left</div>
     <div id="weeks" class="value">--</div>
     <div id="dateDisplay" class="date">Wrap: --</div>
@@ -96,6 +97,7 @@
     }
 
     function calculate(){
+        const nowLive = new Date();
         const today = new Date();
         today.setHours(0,0,0,0);
         const now = new Date();
@@ -112,6 +114,23 @@
         }
 
         const mainCount = countDays(targetDates.main);
+
+        // Time remaining: from NOW until 18:30 (same day only)
+        const endOfDay = new Date(nowLive);
+        endOfDay.setHours(18,30,0,0);
+
+        let diffMs = endOfDay - nowLive;
+
+        let hrs = 0, mins = 0, secs = 0;
+
+        if(diffMs > 0 && isWorkingDay(nowLive)){
+            const totalSec = Math.floor(diffMs / 1000);
+            hrs  = Math.floor(totalSec / 3600);
+            mins = Math.floor((totalSec % 3600) / 60);
+            secs = totalSec % 60;
+        }
+
+        document.getElementById("timeRemaining").textContent = `${hrs}h ${mins}m ${secs}s`;
         const animCount = countDays(targetDates.animation);
         const layCount = countDays(targetDates.layout);
 
@@ -181,7 +200,7 @@
         alert(`Upcoming Holidays:\n${text}`);
     });
 
-    setInterval(calculate,60000);
+    setInterval(calculate,1000);
     calculate();
 })();
 </script>
